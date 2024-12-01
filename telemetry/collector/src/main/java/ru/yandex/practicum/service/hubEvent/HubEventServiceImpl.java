@@ -2,8 +2,11 @@ package ru.yandex.practicum.service.hubEvent;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.kafka.telemetry.event.*;
+import ru.yandex.practicum.kafkaClient.KafkaClient;
 import ru.yandex.practicum.model.hubEvent.*;
 
 import java.util.List;
@@ -12,9 +15,16 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class HubEventServiceImpl implements HubEventService {
+
+    private final KafkaClient kafkaClient;
+
+    @Value(value = "${hubEventTopic}")
+    private String topic;
+
     @Override
     public void collectEvent(HubEvent event) {
         HubEventAvro hubEventAvro = mapToAvro(event);
+        kafkaClient.getProducer().send(new ProducerRecord<>(topic,hubEventAvro));
     }
 
     private HubEventAvro mapToAvro(HubEvent event) {
