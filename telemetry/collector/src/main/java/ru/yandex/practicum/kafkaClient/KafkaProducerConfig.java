@@ -5,6 +5,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.VoidSerializer;
+import org.apache.kafka.common.utils.Utils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,6 +47,8 @@ public class KafkaProducerConfig {
             @Override
             public void stop() {
                 if (producer != null) {
+                    producer.flush();
+                    Utils.sleep(100000);
                     producer.close();
                 }
             }
