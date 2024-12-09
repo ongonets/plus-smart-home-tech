@@ -2,6 +2,7 @@ package ru.yandex.practicum.service.hubEvent;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,9 @@ public class HubEventServiceImpl implements HubEventService {
     @Override
     public void collectEvent(HubEvent event) {
         HubEventAvro hubEventAvro = mapToAvro(event);
-        kafkaClient.getProducer().send(new ProducerRecord<>(topic,hubEventAvro));
+        ProducerRecord<String, SpecificRecordBase> producerRecord = new ProducerRecord<>(topic, null,
+                hubEventAvro.getTimestamp().getEpochSecond(), null, hubEventAvro);
+        kafkaClient.getProducer().send(producerRecord);
     }
 
     private HubEventAvro mapToAvro(HubEvent event) {

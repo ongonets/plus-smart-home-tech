@@ -2,6 +2,7 @@ package ru.yandex.practicum.service.sensorEvent;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,9 @@ public class SensorEventServiceImpl implements SensorEventService {
     @Override
     public void collectEvent(SensorEvent event) {
         SensorEventAvro sensorEventAvro = mapToAvro(event);
-        kafkaClient.getProducer().send(new ProducerRecord<>(topic, sensorEventAvro));
+        ProducerRecord<String, SpecificRecordBase> producerRecord = new ProducerRecord<>(topic, null,
+                sensorEventAvro.getTimestamp().getEpochSecond(), null, sensorEventAvro);
+        kafkaClient.getProducer().send(producerRecord);
     }
 
     private SensorEventAvro mapToAvro(SensorEvent event) {
