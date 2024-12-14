@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.service.GrpcService;
 import ru.yandex.practicum.grpc.telemetry.collector.CollectorControllerGrpc;
 import ru.yandex.practicum.grpc.telemetry.event.*;
+import ru.yandex.practicum.handlers.hubEvent.HubEventHandler;
 import ru.yandex.practicum.handlers.sensorEvent.SensorEventHandler;
 
 import java.util.Map;
@@ -21,11 +22,17 @@ public class EventController extends CollectorControllerGrpc.CollectorController
 
 
     private final Map<SensorEventProto.PayloadCase, SensorEventHandler> sensorEventHandlers;
+    private final Map<HubEventProto.PayloadCase, HubEventHandler> hubEventHandlers;
 
-    public EventController(Set<SensorEventHandler> sensorEventHandlers) {
+    public EventController(Set<SensorEventHandler> sensorEventHandlers, Set<HubEventHandler> hubEventHandlers) {
         this.sensorEventHandlers = sensorEventHandlers.stream()
                 .collect(Collectors.toMap(
                         SensorEventHandler::getMessageType,
+                        Function.identity()
+                ));
+        this.hubEventHandlers = hubEventHandlers.stream()
+                .collect(Collectors.toMap(
+                        HubEventHandler::getMessageType,
                         Function.identity()
                 ));
     }
@@ -50,6 +57,7 @@ public class EventController extends CollectorControllerGrpc.CollectorController
     public void collectHubEvent(HubEventProto request, StreamObserver<Empty> responseObserver) {
         try {
             log.info("Received event from hub ID = {}", request.getHubId());
+            hubEventHandlers.get(request.getPayloadCase()).handle(request);
             responseObserver.onNext(Empty.getDefaultInstance());
             responseObserver.onCompleted();
         } catch (Exception e) {
