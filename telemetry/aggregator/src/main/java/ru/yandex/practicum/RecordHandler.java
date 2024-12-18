@@ -19,8 +19,8 @@ public class RecordHandler {
 
     public Optional<SensorsSnapshotAvro> updateState(SensorEventAvro event) {
         SensorsSnapshotAvro snapshot;
-        if (snapshots.containsKey(event.getId())) {
-            snapshot = snapshots.get(event.getId());
+        if (snapshots.containsKey(event.getHubId())) {
+            snapshot = snapshots.get(event.getHubId());
         } else {
             snapshot = SensorsSnapshotAvro.newBuilder()
                     .setHubId(event.getHubId())
@@ -39,6 +39,7 @@ public class RecordHandler {
         sensorsState.put(event.getId(), sensorStateAvro);
         snapshot.setSensorsState(sensorsState);
         snapshot.setTimestamp(event.getTimestamp());
+        snapshots.put(snapshot.getHubId(), snapshot);
         return Optional.of(snapshot);
     }
 
