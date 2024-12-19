@@ -19,8 +19,8 @@ public class RecordHandler {
 
     public Optional<SensorsSnapshotAvro> updateState(SensorEventAvro event) {
         SensorsSnapshotAvro snapshot;
-        if (snapshots.containsKey(event.getId())) {
-            snapshot = snapshots.get(event.getId());
+        if (snapshots.containsKey(event.getHubId())) {
+            snapshot = snapshots.get(event.getHubId());
         } else {
             snapshot = SensorsSnapshotAvro.newBuilder()
                     .setHubId(event.getHubId())
@@ -29,7 +29,7 @@ public class RecordHandler {
                     .build();
         }
         Map<String, SensorStateAvro> sensorsState = snapshot.getSensorsState();
-        if (isDataChanged(sensorsState, event)) {
+        if (isDataNotChanged(sensorsState, event)) {
             return Optional.empty();
         }
         SensorStateAvro sensorStateAvro = SensorStateAvro.newBuilder()
@@ -39,17 +39,23 @@ public class RecordHandler {
         sensorsState.put(event.getId(), sensorStateAvro);
         snapshot.setSensorsState(sensorsState);
         snapshot.setTimestamp(event.getTimestamp());
+        snapshots.put(snapshot.getHubId(), snapshot);
         return Optional.of(snapshot);
     }
 
 
-    private boolean isDataChanged(Map<String, SensorStateAvro> sensorsState, SensorEventAvro event) {
+    private boolean isDataNotChanged(Map<String, SensorStateAvro> sensorsState, SensorEventAvro event) {
         if (sensorsState != null && sensorsState.containsKey(event.getId())) {
             SensorStateAvro oldState = sensorsState.get(event.getId());
-            return (oldState.getTimestamp().isAfter(event.getTimestamp())) ||
-                    (oldState.getData() == event.getPayload());
+            return !isOldStateBeforeAndDateNotEquals(oldState, event);
         } else {
             return false;
         }
     }
+    private boolean isOldStateBeforeAndDateNotEquals(SensorStateAvro oldState, SensorEventAvro event) {
+        boolean isOldStateBefore = oldState.getTimestamp().isBefore(event.getTimestamp());
+        boolean isDateEquals = oldState.getData().equals(event.getPayload());
+        return  isOldStateBefore && !isDateEquals;
+    }
+
 }

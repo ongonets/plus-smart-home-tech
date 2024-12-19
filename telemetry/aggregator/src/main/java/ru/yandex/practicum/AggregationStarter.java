@@ -83,6 +83,10 @@ public class AggregationStarter {
         }
     }
 
+    public void stop() {
+        consumer.wakeup();
+    }
+
     private static Properties getConsumerProperties() {
         Properties properties = new Properties();
         properties.put(ConsumerConfig.CLIENT_ID_CONFIG, "SomeConsumer");
