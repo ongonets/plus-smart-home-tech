@@ -5,18 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
-import org.apache.kafka.common.serialization.VoidDeserializer;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.AnalyzerConfig;
 import ru.yandex.practicum.handlers.HubEventHandler;
-import ru.yandex.practicum.kafka.deserializer.HubEventDeserializer;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 
-import java.time.Duration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 @Component
 @Slf4j
@@ -43,6 +38,7 @@ public class HubEventProcessor implements Runnable {
                     handler.handle(hubEventAvro);
                     manageOffsets(record, consumer);
                 }
+                consumer.commitAsync();
             }
         } catch (WakeupException ignored) {
 

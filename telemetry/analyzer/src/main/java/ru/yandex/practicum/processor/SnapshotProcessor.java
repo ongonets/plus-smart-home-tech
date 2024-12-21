@@ -6,24 +6,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
-import org.apache.kafka.common.serialization.VoidDeserializer;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.AnalyzerConfig;
 import ru.yandex.practicum.handlers.SnapshotHandler;
-import ru.yandex.practicum.kafka.deserializer.SensorSnapshotDeserializer;
 import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
 
-import java.time.Duration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
 public class SnapshotProcessor {
 
+    private static final int COUNT_COMMIT_OFFSETS = 10;
     private static final Map<TopicPartition, OffsetAndMetadata> currentOffsets = new HashMap<>();
 
     private final KafkaConsumer<String, SensorsSnapshotAvro> consumer;
@@ -33,17 +29,20 @@ public class SnapshotProcessor {
 
     public void start() {
         try {
-            consumer.subscribe(config.getHubTopics());
+            consumer.subscribe(config.getSnapshotTopics());
 
             while (true) {
                 ConsumerRecords<String, SensorsSnapshotAvro> records = consumer
                         .poll(config.getSnapshotConsumeAttemptTimeout());
+                int count = 0;
                 for (ConsumerRecord<String, SensorsSnapshotAvro> record : records) {
                     SensorsSnapshotAvro sensorsSnapshotAvro = record.value();
                     log.info("Received snapshot from hub ID = {}", sensorsSnapshotAvro.getHubId());
                     handler.handle(sensorsSnapshotAvro);
-                    manageOffsets(record, consumer);
+                    manageOffsets(record,count, consumer);
+                    count++;
                 }
+                consumer.commitAsync();
             }
         } catch (WakeupException ignored) {
 
@@ -63,11 +62,19 @@ public class SnapshotProcessor {
         consumer.wakeup();
     }
 
-    private static void manageOffsets(ConsumerRecord<String, SensorsSnapshotAvro> record,
+    private static void manageOffsets(ConsumerRecord<String, SensorsSnapshotAvro> record, int count,
                                       KafkaConsumer<String, SensorsSnapshotAvro> consumer) {
         currentOffsets.put(
                 new TopicPartition(record.topic(), record.partition()),
                 new OffsetAndMetadata(record.offset() + 1)
         );
+
+        if (count % COUNT_COMMIT_OFFSETS == 0) {
+            consumer.commitAsync(currentOffsets, (offsets, exception) -> {
+                if (exception != null) {
+                    log.warn("Commit offsets error: {}", offsets, exception);
+                }
+            });
+        }
     }
 }
