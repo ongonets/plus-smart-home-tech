@@ -1,11 +1,13 @@
 package ru.yandex.practicum.processor;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.VoidDeserializer;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.AnalyzerConfig;
 import ru.yandex.practicum.handlers.HubEventHandler;
 import ru.yandex.practicum.kafka.deserializer.HubEventDeserializer;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
@@ -18,27 +20,23 @@ import java.util.Properties;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class HubEventProcessor implements Runnable {
 
-    private static final List<String> TOPICS = List.of("telemetry.hubs.v1");
     private static final Map<TopicPartition, OffsetAndMetadata> currentOffsets = new HashMap<>();
-    private static final Duration CONSUME_ATTEMPT_TIMEOUT = Duration.ofMillis(1000);
 
     private final KafkaConsumer<String, HubEventAvro> consumer;
     private final HubEventHandler handler;
+    private final AnalyzerConfig config;
 
-    public HubEventProcessor(HubEventHandler handler) {
-        consumer = new KafkaConsumer<>(getConsumerProperties());
-        this.handler = handler;
-    }
 
     @Override
     public void run() {
         try {
-            consumer.subscribe(TOPICS);
+            consumer.subscribe(config.getHubTopics());
 
             while (true) {
-                ConsumerRecords<String, HubEventAvro> records = consumer.poll(CONSUME_ATTEMPT_TIMEOUT);
+                ConsumerRecords<String, HubEventAvro> records = consumer.poll(config.getHubConsumeAttemptTimeout());
                 for (ConsumerRecord<String, HubEventAvro> record : records) {
                     HubEventAvro hubEventAvro = record.value();
                     log.info("Received hubEvent from hub ID = {}", hubEventAvro.getHubId());
@@ -62,16 +60,6 @@ public class HubEventProcessor implements Runnable {
 
     public void stop() {
         consumer.wakeup();
-    }
-
-    private static Properties getConsumerProperties() {
-        Properties properties = new Properties();
-        properties.put(ConsumerConfig.CLIENT_ID_CONFIG, "hubConsumer");
-        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "hub.analyzing");
-        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, VoidDeserializer.class);
-        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, HubEventDeserializer.class);
-        return properties;
     }
 
     private static void manageOffsets(ConsumerRecord<String, HubEventAvro> record,
