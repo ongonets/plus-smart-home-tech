@@ -15,7 +15,7 @@ import java.util.Properties;
 import java.util.List;
 
 @Configuration
-@ConfigurationProperties(prefix = "aggregator")
+@ConfigurationProperties("aggregator")
 @Setter
 @Getter
 public class AggregatorConfig {
