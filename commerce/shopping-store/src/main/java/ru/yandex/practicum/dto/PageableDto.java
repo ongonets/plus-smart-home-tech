@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class Pageable {
+public class PageableDto {
     private int page;
     private int size;
     private List<String> sort;
