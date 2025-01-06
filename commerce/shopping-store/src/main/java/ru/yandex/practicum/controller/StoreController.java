@@ -3,7 +3,7 @@ package ru.yandex.practicum.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.dto.Pageable;
+import ru.yandex.practicum.dto.PageableDto;
 import ru.yandex.practicum.dto.ProductDto;
 import ru.yandex.practicum.dto.QuantityState;
 import ru.yandex.practicum.dto.SetProductQuantityStateRequest;
@@ -22,10 +22,10 @@ public class StoreController {
     @GetMapping
     public List<ProductDto> findProduct(@RequestParam String category,
                                          @RequestParam(defaultValue = "0") int page,
-                                         @RequestParam(defaultValue = "0") int size,
+                                         @RequestParam(defaultValue = "10") int size,
                                          @RequestParam(defaultValue = "rating") List<String> sort) {
-        Pageable pageable = new Pageable(page, size, sort);
-        return service.findProduct(category, pageable);
+        PageableDto pageableDto = new PageableDto(page, size, sort);
+        return service.findProduct(category, pageableDto);
     }
 
     @PutMapping
@@ -38,16 +38,16 @@ public class StoreController {
     @PostMapping
     public ProductDto updateProduct(@RequestBody ProductDto productDto) {
         log.info("Received request to update product: {}", productDto);
-        return service.updateDto(productDto);
+        return service.updateProduct(productDto);
     }
 
-    @PostMapping(path = "/removeProductFromStore")
+    @PostMapping("/removeProductFromStore")
     public void removeProduct(@RequestParam String productId) {
         log.info("Received request to remove product ID: {}", productId);
         service.removeProduct(productId);
     }
 
-    @PostMapping(path = "/quantityState")
+    @PostMapping("/quantityState")
     public void updateProductQuantity(@RequestParam String productId,
                                       @RequestParam QuantityState quantityState) {
         SetProductQuantityStateRequest request = new SetProductQuantityStateRequest(productId, quantityState);
@@ -55,7 +55,7 @@ public class StoreController {
         service.updateQuantity(request);
     }
 
-    @GetMapping(path = "/{productID}")
+    @GetMapping("/{productId}")
     public ProductDto findProduct(@PathVariable String productId) {
         return service.findProduct(productId);
     }
