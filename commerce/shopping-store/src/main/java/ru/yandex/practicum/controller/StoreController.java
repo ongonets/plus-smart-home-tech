@@ -42,7 +42,8 @@ public class StoreController {
     }
 
     @PostMapping("/removeProductFromStore")
-    public void removeProduct(@RequestParam String productId) {
+    public void removeProduct(@RequestBody String productId) {
+        productId = productId.substring(1, productId.length()-1);
         log.info("Received request to remove product ID: {}", productId);
         service.removeProduct(productId);
     }

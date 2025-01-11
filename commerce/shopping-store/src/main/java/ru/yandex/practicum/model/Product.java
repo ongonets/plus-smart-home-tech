@@ -5,11 +5,13 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.UuidGenerator;
 import ru.yandex.practicum.dto.ProductCategory;
 import ru.yandex.practicum.dto.ProductState;
 import ru.yandex.practicum.dto.QuantityState;
 
 import java.util.Objects;
+import java.util.UUID;
 
 
 @Entity
@@ -20,7 +22,8 @@ import java.util.Objects;
 public class Product {
 
     @Id
-    private String id;
+    @UuidGenerator
+    private UUID id;
 
     private String name;
 

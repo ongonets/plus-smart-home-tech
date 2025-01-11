@@ -13,6 +13,7 @@ import ru.yandex.practicum.model.Product;
 import ru.yandex.practicum.repository.StoreRepository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -70,7 +71,8 @@ public class StoreServiceImpl implements StoreService {
     }
 
     private Product getProduct(String productId) {
-        return repository.findById(productId)
+        UUID uuid = UUID.fromString(productId);
+        return repository.findById(uuid)
                 .orElseThrow(() ->
                         {
                             log.error("Not found product ID: {} ", productId);
