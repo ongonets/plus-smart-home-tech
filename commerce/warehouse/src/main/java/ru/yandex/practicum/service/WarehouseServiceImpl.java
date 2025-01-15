@@ -3,6 +3,7 @@ package ru.yandex.practicum.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.controller.ShoppingStoreOperations;
 import ru.yandex.practicum.dto.*;
 import ru.yandex.practicum.exception.NoSpecifiedProductInWarehouseException;
 import ru.yandex.practicum.exception.ProductInShoppingCartLowQuantityInWarehouse;
@@ -40,6 +41,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     private final WarehouseRepository repository;
     private final WarehouseMapper mapper;
+    private final ShoppingStoreOperations shoppingStoreClient;
 
     @Override
     public void createProduct(NewProductInWarehouseRequest productDto) {
@@ -66,6 +68,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         WarehouseProduct product = getProduct(request.getProductId());
         addQuantity(product, request.getQuantity());
         repository.save(product);
+        updateQuantityInShoppingStore(product);
         log.info("Add product ID: {} to warehouse, new quantity = {} ", product.getId(), product.getQuantity());
     }
 
@@ -96,6 +99,21 @@ public class WarehouseServiceImpl implements WarehouseService {
     private void addQuantity(WarehouseProduct product, int newQuantity) {
         int oldQuantity = product.getQuantity();
         product.setQuantity(oldQuantity + newQuantity);
+    }
+
+    private void updateQuantityInShoppingStore(WarehouseProduct product) {
+        int quantity = product.getQuantity();
+        QuantityState quantityState;
+        if (quantity == 0) {
+            quantityState = QuantityState.ENDED;
+        } else if (0 < quantity && quantity <= 10) {
+            quantityState = QuantityState.FEW;
+        } else if (10 < quantity && quantity <= 100) {
+            quantityState = QuantityState.ENOUGH;
+        } else  {
+            quantityState = QuantityState.MANY;
+        }
+        shoppingStoreClient.updateProductQuantity(product.getId(), quantityState);
     }
 
     private void checkProductQuantity(Stream<WarehouseProduct> stream,

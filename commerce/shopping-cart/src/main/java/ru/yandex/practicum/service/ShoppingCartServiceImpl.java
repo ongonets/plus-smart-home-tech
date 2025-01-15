@@ -3,6 +3,7 @@ package ru.yandex.practicum.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.controller.WarehouseOperations;
 import ru.yandex.practicum.dto.BookedProductsDto;
 import ru.yandex.practicum.dto.ChangeProductQuantityRequest;
 import ru.yandex.practicum.dto.ShoppingCartDto;
@@ -21,6 +22,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     private final ShoppingCartRepository repository;
     private final ShoppingCartMapper mapper;
+    private final WarehouseOperations warehouseClient;
 
     @Override
     public ShoppingCartDto findShoppingCarte(String username) {
@@ -78,7 +80,10 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     @Override
     public BookedProductsDto bookProductFromShoppingCart(String username) {
         validateUsername(username);
-        return null;
+        ShoppingCart shoppingCart = getShoppingCart(username);
+        BookedProductsDto bookedProductsDto = warehouseClient.checkShoppingCart(mapper.map(shoppingCart));
+        log.info("Booked product from shopping cart ID: {}", shoppingCart.getId());
+        return bookedProductsDto;
     }
 
     private ShoppingCart getShoppingCart(String username) {

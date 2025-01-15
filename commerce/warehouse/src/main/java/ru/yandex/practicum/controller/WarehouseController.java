@@ -10,7 +10,7 @@ import ru.yandex.practicum.service.WarehouseService;
 @RequestMapping(path = "/api/v1/warehouse")
 @Slf4j
 @RequiredArgsConstructor
-public class WarehouseController {
+public class WarehouseController implements WarehouseOperations {
 
     private final WarehouseService service;
 
@@ -20,8 +20,8 @@ public class WarehouseController {
         service.createProduct(productDto);
     }
 
-    @PostMapping("/check")
-    public BookedProductsDto checkShoppingCart(@RequestBody ShoppingCartDto shoppingCartDto) {
+    @Override
+    public BookedProductsDto checkShoppingCart(ShoppingCartDto shoppingCartDto) {
         log.info("Received request to check shopping cart ID: {}", shoppingCartDto.getShoppingCartId());
         return service.checkShoppingCart(shoppingCartDto);
     }
@@ -37,11 +37,6 @@ public class WarehouseController {
         log.info("Received request to find warehouse address");
         return service.findAddress();
     }
-
-
-
-
-
 
 
 }

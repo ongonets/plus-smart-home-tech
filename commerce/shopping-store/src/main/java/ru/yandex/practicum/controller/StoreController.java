@@ -15,7 +15,7 @@ import java.util.List;
 @RequestMapping(path = "/api/v1/shopping-store")
 @Slf4j
 @RequiredArgsConstructor
-public class StoreController {
+public class StoreController implements ShoppingStoreOperations {
 
     private final StoreService service;
 
@@ -48,9 +48,8 @@ public class StoreController {
         service.removeProduct(productId);
     }
 
-    @PostMapping("/quantityState")
-    public void updateProductQuantity(@RequestParam String productId,
-                                      @RequestParam QuantityState quantityState) {
+    @Override
+    public void updateProductQuantity(String productId, QuantityState quantityState) {
         SetProductQuantityStateRequest request = new SetProductQuantityStateRequest(productId, quantityState);
         log.info("Received request to update quantity: {}", request);
         service.updateQuantity(request);
