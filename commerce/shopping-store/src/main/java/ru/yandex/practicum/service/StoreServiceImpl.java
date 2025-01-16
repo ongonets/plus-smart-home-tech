@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.dto.*;
-import ru.yandex.practicum.exception.NotFoundException;
+import ru.yandex.practicum.exception.ProductNotFoundException;
 import ru.yandex.practicum.mapper.StoreMapper;
 import ru.yandex.practicum.model.Product;
 import ru.yandex.practicum.repository.StoreRepository;
@@ -76,7 +76,7 @@ public class StoreServiceImpl implements StoreService {
                 .orElseThrow(() ->
                         {
                             log.error("Not found product ID: {} ", productId);
-                            return new NotFoundException(String.format("Not found product ID:  %s", productId));
+                            return new ProductNotFoundException(String.format("Not found product ID:  %s", productId));
                         }
                 );
     }

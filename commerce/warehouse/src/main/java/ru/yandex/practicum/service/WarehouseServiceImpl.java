@@ -1,5 +1,6 @@
 package ru.yandex.practicum.service;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -7,6 +8,7 @@ import ru.yandex.practicum.controller.ShoppingStoreOperations;
 import ru.yandex.practicum.dto.*;
 import ru.yandex.practicum.exception.NoSpecifiedProductInWarehouseException;
 import ru.yandex.practicum.exception.ProductInShoppingCartLowQuantityInWarehouse;
+import ru.yandex.practicum.exception.SpecifiedProductAlreadyInWarehouseException;
 import ru.yandex.practicum.mapper.WarehouseMapper;
 import ru.yandex.practicum.model.WarehouseProduct;
 import ru.yandex.practicum.repository.WarehouseRepository;
@@ -14,7 +16,6 @@ import ru.yandex.practicum.repository.WarehouseRepository;
 import java.security.SecureRandom;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -92,7 +93,8 @@ public class WarehouseServiceImpl implements WarehouseService {
     private void checkProductExist(String productId) {
         if (repository.existsById(productId)) {
             log.error("Product ID: {} already exist", productId);
-            throw new NoSpecifiedProductInWarehouseException(String.format("Product ID: %s already exist", productId));
+            throw new SpecifiedProductAlreadyInWarehouseException(
+                    String.format("Product ID: %s already exist", productId));
         }
     }
 
@@ -113,7 +115,11 @@ public class WarehouseServiceImpl implements WarehouseService {
         } else  {
             quantityState = QuantityState.MANY;
         }
-        shoppingStoreClient.updateProductQuantity(product.getId(), quantityState);
+        try {
+            shoppingStoreClient.updateProductQuantity(product.getId(), quantityState);
+        } catch (FeignException e) {
+            log.error("Product quantity in store not update", e);
+        }
     }
 
     private void checkProductQuantity(Stream<WarehouseProduct> stream,

@@ -1,5 +1,8 @@
 package ru.yandex.practicum.service;
 
+import feign.FeignException;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.ServerErrorException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -8,6 +11,7 @@ import ru.yandex.practicum.dto.BookedProductsDto;
 import ru.yandex.practicum.dto.ChangeProductQuantityRequest;
 import ru.yandex.practicum.dto.ShoppingCartDto;
 import ru.yandex.practicum.exception.NotAuthorizedUserException;
+import ru.yandex.practicum.exception.ProductInShoppingCartNotInWarehouse;
 import ru.yandex.practicum.mapper.ShoppingCartMapper;
 import ru.yandex.practicum.model.ShoppingCart;
 import ru.yandex.practicum.model.ShoppingCartState;
@@ -81,9 +85,18 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     public BookedProductsDto bookProductFromShoppingCart(String username) {
         validateUsername(username);
         ShoppingCart shoppingCart = getShoppingCart(username);
-        BookedProductsDto bookedProductsDto = warehouseClient.checkShoppingCart(mapper.map(shoppingCart));
-        log.info("Booked product from shopping cart ID: {}", shoppingCart.getId());
-        return bookedProductsDto;
+        try {
+            BookedProductsDto bookedProductsDto = warehouseClient.checkShoppingCart(mapper.map(shoppingCart));
+            log.info("Booked product from shopping cart ID: {}", shoppingCart.getId());
+            return bookedProductsDto;
+        } catch (FeignException e) {
+            if (e.status() == 400) {
+                throw new ProductInShoppingCartNotInWarehouse(
+                        String.format("Product from shopping cart ID: %s not in warehouse", shoppingCart.getId()));
+            } else {
+                throw new InternalServerErrorException("Service warehouse is not available");
+            }
+        }
     }
 
     private ShoppingCart getShoppingCart(String username) {
