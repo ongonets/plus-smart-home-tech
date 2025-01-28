@@ -27,16 +27,18 @@ public class OrderController {
     }
 
     @PutMapping
-    public OrderDto createOrder(@RequestBody CreateNewOrderRequest request) {
+    public OrderDto createOrder(@RequestParam String username,
+                                @RequestBody CreateNewOrderRequest request) {
         log.info("Received request to create order from shopping cart ID: {}",
                 request.getShoppingCart().getShoppingCartId());
-        return service.createOrder(request);
+        return service.createOrder(username, request);
     }
 
     @PostMapping("/return")
-    public OrderDto returnProduct(@RequestBody ProductReturnRequest request) {
+    public OrderDto returnProduct(@RequestParam String username,
+                                  @RequestBody ProductReturnRequest request) {
         log.info("Received request to return product from order ID: {}", request.getOrderId());
-        return service.returnProduct(request);
+        return service.returnProduct(username, request);
     }
 
     @PostMapping("/payment")

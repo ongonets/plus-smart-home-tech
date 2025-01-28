@@ -21,12 +21,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDto createOrder(CreateNewOrderRequest request) {
+    public OrderDto createOrder(String username, CreateNewOrderRequest request) {
         return null;
     }
 
     @Override
-    public OrderDto returnProduct(ProductReturnRequest request) {
+    public OrderDto returnProduct(String username, ProductReturnRequest request) {
         return null;
     }
 

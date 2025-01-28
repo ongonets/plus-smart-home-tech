@@ -11,9 +11,9 @@ public interface OrderService {
 
     List<OrderDto> findOrder(String username, int page, int size);
 
-    OrderDto createOrder(CreateNewOrderRequest request);
+    OrderDto createOrder(String username, CreateNewOrderRequest request);
 
-    OrderDto returnProduct(ProductReturnRequest request);
+    OrderDto returnProduct(String username, ProductReturnRequest request);
 
     OrderDto paymentOrder(UUID orderId);
 
