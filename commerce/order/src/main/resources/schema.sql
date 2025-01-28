@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS orders (
     fragile BOOLEAN,
     total_price FLOAT,
     delivery_price FLOAT,
-    product_price FLOAT,
+    product_price FLOAT
 );
 
 -- создаём таблицу products
