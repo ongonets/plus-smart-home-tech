@@ -16,6 +16,7 @@ import ru.yandex.practicum.repository.WarehouseRepository;
 import java.security.SecureRandom;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -76,6 +77,21 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public AddressDto findAddress() {
         return CURRENT_ADDRESS;
+    }
+
+    @Override
+    public void returnProduct(Map<UUID, Integer> products) {
+
+    }
+
+    @Override
+    public void shippedProductToDelivery(ShippedToDeliveryRequest request) {
+
+    }
+
+    @Override
+    public BookedProductsDto assemblyProduct(AssemblyProductsForOrderRequest request) {
+        return null;
     }
 
     private WarehouseProduct getProduct(String productId) {
