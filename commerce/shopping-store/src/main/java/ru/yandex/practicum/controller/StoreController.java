@@ -55,7 +55,7 @@ public class StoreController implements ShoppingStoreOperations {
         service.updateQuantity(request);
     }
 
-    @GetMapping("/{productId}")
+    @Override
     public ProductDto findProduct(@PathVariable String productId) {
         return service.findProduct(productId);
     }
