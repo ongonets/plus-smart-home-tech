@@ -12,9 +12,9 @@ import java.util.UUID;
 @RequestMapping("/api/v1/delivery")
 @Slf4j
 @RequiredArgsConstructor
-public class DeliveryController {
+public class DeliveryController implements DeliveryOperations {
 
-    @PutMapping
+    @Override
     public DeliveryDto createDelivery(@RequestBody DeliveryDto deliveryDto) {
         log.info("Received request to create delivery for order ID: {}", deliveryDto.getOrderId());
         return null;
@@ -35,7 +35,7 @@ public class DeliveryController {
         log.info("Received request to failed delivery for order ID: {}", orderId);
     }
 
-    @PostMapping("/cost")
+   @Override
     public Double calculateDeliveryCost(@RequestBody OrderDto order) {
         log.info("Received request to calculate delivery cost for order ID: {}", order.getOrderId());
         return null;

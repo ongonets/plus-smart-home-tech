@@ -15,16 +15,15 @@ import java.util.UUID;
 @RequestMapping("/api/v1/payment")
 @Slf4j
 @RequiredArgsConstructor
-public class PaymentController {
+public class PaymentController implements PaymentOperations {
 
-
-    @PostMapping
+    @Override
     public PaymentDto createPayment(@RequestBody OrderDto order) {
         log.info("Received request to create payment for order ID: {}", order.getOrderId());
         return null;
     }
 
-    @PostMapping("/totalCost")
+    @Override
     public Double calculateTotalCost(@RequestBody OrderDto order) {
         log.info("Received request to calculate total cost for order ID: {}", order.getOrderId());
         return null;
@@ -35,7 +34,7 @@ public class PaymentController {
         log.info("Received request to refund payment ID: {}", paymentID);
     }
 
-    @PostMapping("/productCost")
+    @Override
     public Double calculateProductCost(@RequestBody OrderDto order) {
         log.info("Received request to calculate product cost for order ID: {}", order.getOrderId());
         return null;
@@ -45,5 +44,4 @@ public class PaymentController {
     public void failedPayment(@RequestBody UUID paymentID) {
         log.info("Received request to failed payment ID: {}", paymentID);
     }
-
 }

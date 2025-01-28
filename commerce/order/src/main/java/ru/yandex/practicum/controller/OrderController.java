@@ -15,7 +15,7 @@ import java.util.UUID;
 @RequestMapping(path = "/api/v1/order")
 @Slf4j
 @RequiredArgsConstructor
-public class OrderController {
+public class OrderController implements OrderOperations {
 
     private final OrderService service;
 
@@ -41,36 +41,6 @@ public class OrderController {
         return service.returnProduct(username, request);
     }
 
-    @PostMapping("/payment")
-    public OrderDto paymentOrder(@RequestBody UUID orderId) {
-        log.info("Received request to payment order ID: {}", orderId);
-        return service.paymentOrder(orderId);
-    }
-
-    @PostMapping("/payment/failed")
-    public OrderDto failedPaymentOrder(@RequestBody UUID orderId) {
-        log.info("Received request to failed payment order ID: {}", orderId);
-        return service.failedPaymentOrder(orderId);
-    }
-
-    @PostMapping("/delivery")
-    public OrderDto deliveryOrder(@RequestBody UUID orderId) {
-        log.info("Received request to delivery order ID: {}", orderId);
-        return service.deliveryOrder(orderId);
-    }
-
-    @PostMapping("/delivery/failed")
-    public OrderDto failedDeliveryOrder(@RequestBody UUID orderId) {
-        log.info("Received request to failed delivery order ID: {}", orderId);
-        return service.failedDeliveryOrder(orderId);
-    }
-
-    @PostMapping("/completed")
-    public OrderDto completedOrder(@RequestBody UUID orderId) {
-        log.info("Received request to completed order ID: {}", orderId);
-        return service.completedOrder(orderId);
-    }
-
     @PostMapping("/calculate/total")
     public OrderDto calculateTotalPrice(@RequestBody UUID orderId) {
         log.info("Received request to calculate total price of order ID: {}", orderId);
@@ -83,13 +53,43 @@ public class OrderController {
         return service.calculateDeliveryPrice(orderId);
     }
 
-    @PostMapping("/assembly")
+    @Override
+    public OrderDto paymentOrder(@RequestBody UUID orderId) {
+        log.info("Received request to payment order ID: {}", orderId);
+        return service.paymentOrder(orderId);
+    }
+
+    @Override
+    public OrderDto failedPaymentOrder(@RequestBody UUID orderId) {
+        log.info("Received request to failed payment order ID: {}", orderId);
+        return service.failedPaymentOrder(orderId);
+    }
+
+    @Override
+    public OrderDto deliveryOrder(@RequestBody UUID orderId) {
+        log.info("Received request to delivery order ID: {}", orderId);
+        return service.deliveryOrder(orderId);
+    }
+
+    @Override
+    public OrderDto failedDeliveryOrder(@RequestBody UUID orderId) {
+        log.info("Received request to failed delivery order ID: {}", orderId);
+        return service.failedDeliveryOrder(orderId);
+    }
+
+    @Override
+    public OrderDto completedOrder(@RequestBody UUID orderId) {
+        log.info("Received request to completed order ID: {}", orderId);
+        return service.completedOrder(orderId);
+    }
+
+    @Override
     public OrderDto assemblyOrder(@RequestBody UUID orderId) {
         log.info("Received request to assembly order ID: {}", orderId);
         return service.assemblyOrder(orderId);
     }
 
-    @PostMapping("/assembly/failed")
+    @Override
     public OrderDto failedAssemblyOrder(@RequestBody UUID orderId) {
         log.info("Received request to failed assembly order ID: {}", orderId);
         return service.failedAssemblyOrder(orderId);
