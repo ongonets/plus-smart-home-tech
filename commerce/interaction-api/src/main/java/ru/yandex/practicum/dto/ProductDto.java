@@ -6,11 +6,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 public class ProductDto {
 
     @NotBlank
-    private String productId;
+    private UUID productId;
 
     @NotBlank
     private String productName;
