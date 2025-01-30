@@ -6,8 +6,10 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Table(name = "Products")
@@ -17,7 +19,8 @@ import java.util.Objects;
 public class WarehouseProduct {
 
     @Id
-    private String id;
+    @UuidGenerator
+    private UUID id;
 
     private double weight;
 

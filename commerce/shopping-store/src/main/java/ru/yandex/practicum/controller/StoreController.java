@@ -10,6 +10,7 @@ import ru.yandex.practicum.dto.SetProductQuantityStateRequest;
 import ru.yandex.practicum.service.StoreService;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(path = "/api/v1/shopping-store")
@@ -42,21 +43,20 @@ public class StoreController implements ShoppingStoreOperations {
     }
 
     @PostMapping("/removeProductFromStore")
-    public void removeProduct(@RequestBody String productId) {
-        productId = productId.substring(1, productId.length()-1);
+    public void removeProduct(@RequestBody UUID productId) {
         log.info("Received request to remove product ID: {}", productId);
         service.removeProduct(productId);
     }
 
     @Override
-    public void updateProductQuantity(String productId, QuantityState quantityState) {
+    public void updateProductQuantity(UUID productId, QuantityState quantityState) {
         SetProductQuantityStateRequest request = new SetProductQuantityStateRequest(productId, quantityState);
         log.info("Received request to update quantity: {}", request);
         service.updateQuantity(request);
     }
 
     @Override
-    public ProductDto findProduct(@PathVariable String productId) {
+    public ProductDto findProduct(@PathVariable UUID productId) {
         return service.findProduct(productId);
     }
 

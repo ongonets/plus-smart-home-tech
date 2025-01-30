@@ -9,13 +9,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import ru.yandex.practicum.dto.ProductDto;
 import ru.yandex.practicum.dto.QuantityState;
 
+import java.util.UUID;
+
 @FeignClient(name = "shopping-store", path = "/api/v1/shopping-store")
 public interface ShoppingStoreOperations {
 
     @PostMapping("/quantityState")
-    void updateProductQuantity(@RequestParam String productId,
+    void updateProductQuantity(@RequestParam UUID productId,
                                @RequestParam QuantityState quantityState) throws FeignException;
 
     @GetMapping("/{productId}")
-    ProductDto findProduct(@PathVariable String productId) throws FeignException;
+    ProductDto findProduct(@PathVariable UUID productId) throws FeignException;
 }

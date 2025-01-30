@@ -1,6 +1,6 @@
 -- создаём таблицу products
 CREATE TABLE IF NOT EXISTS products (
-    id VARCHAR PRIMARY KEY,
+    id UUID PRIMARY KEY,
     weight FLOAT,
     width FLOAT,
     height FLOAT,

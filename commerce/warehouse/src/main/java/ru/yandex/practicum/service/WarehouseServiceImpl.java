@@ -56,7 +56,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public BookedProductsDto checkShoppingCart(ShoppingCartDto shoppingCartDto) {
         String shoppingCartId = shoppingCartDto.getShoppingCartId();
-        Map<String, Integer> products = shoppingCartDto.getProducts();
+        Map<UUID, Integer> products = shoppingCartDto.getProducts();
         Supplier<Stream<WarehouseProduct>> streamSupplier = () -> repository.findAllById(products.keySet()).stream();
         checkProductQuantity(streamSupplier.get(), products, shoppingCartId);
         BookedProductsDto bookedProductsDto = calculateDeliveryParams(streamSupplier);
@@ -94,7 +94,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         return null;
     }
 
-    private WarehouseProduct getProduct(String productId) {
+    private WarehouseProduct getProduct(UUID productId) {
         return repository.findById(productId)
                 .orElseThrow(() ->
                         {
@@ -106,7 +106,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 );
     }
 
-    private void checkProductExist(String productId) {
+    private void checkProductExist(UUID productId) {
         if (repository.existsById(productId)) {
             log.error("Product ID: {} already exist", productId);
             throw new SpecifiedProductAlreadyInWarehouseException(
@@ -139,7 +139,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     private void checkProductQuantity(Stream<WarehouseProduct> stream,
-                                      Map<String, Integer> products,
+                                      Map<UUID, Integer> products,
                                       String shoppingCartId) {
         if (stream.anyMatch(product -> product.getQuantity() < products.get(product.getId()))) {
             log.error("Quantity of products is less than necessary for shopping cart ID: {}", shoppingCartId);

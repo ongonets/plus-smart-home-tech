@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.Map;
+import java.util.UUID;
 
 @Data
 public class ShoppingCartDto {
@@ -13,5 +14,5 @@ public class ShoppingCartDto {
     private String shoppingCartId;
 
     @NotNull
-    private Map<String, Integer> products;
+    private Map<UUID, Integer> products;
 }
