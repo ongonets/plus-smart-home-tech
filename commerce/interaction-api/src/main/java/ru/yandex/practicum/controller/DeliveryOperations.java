@@ -14,5 +14,5 @@ public interface DeliveryOperations {
     DeliveryDto createDelivery(@RequestBody DeliveryDto deliveryDto);
 
     @PostMapping("/cost")
-    Double calculateDeliveryCost(@RequestBody OrderDto order);
+    Double calculateDeliveryCost(@RequestBody DeliveryDto deliveryDto);
 }

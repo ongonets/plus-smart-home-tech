@@ -19,5 +19,14 @@ public class DeliveryDto {
     @NotNull
     private AddressDto toAddress;
 
+    @NotNull
+    private double deliveryVolume;
+
+    @NotNull
+    private double deliveryWeight;
+
+    @NotNull
+    private boolean fragile;
+
     private DeliveryState deliveryState;
 }
