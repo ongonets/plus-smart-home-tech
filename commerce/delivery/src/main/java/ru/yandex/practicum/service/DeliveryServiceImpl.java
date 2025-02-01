@@ -5,9 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.controller.OrderOperations;
 import ru.yandex.practicum.controller.WarehouseOperations;
-import ru.yandex.practicum.dto.DeliveryDto;
-import ru.yandex.practicum.dto.DeliveryState;
-import ru.yandex.practicum.dto.OrderDto;
+import ru.yandex.practicum.dto.*;
 import ru.yandex.practicum.exception.NoDeliveryFoundException;
 import ru.yandex.practicum.mapper.DeliveryMapper;
 import ru.yandex.practicum.model.Delivery;
@@ -25,6 +23,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     private final DeliveryRepository repository;
     private final DeliveryMapper mapper;
     private final OrderOperations orderClient;
+    private final WarehouseOperations warehouseClient;
 
     @Override
     public DeliveryDto createDelivery(DeliveryDto deliveryDto) {
@@ -50,6 +49,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         delivery.setState(DeliveryState.IN_PROGRESS);
         repository.save(delivery);
         orderClient.assemblyOrder(orderId);
+        warehouseClient.shippedProductToDelivery(new ShippedToDeliveryRequest(orderId, delivery.getId()));
         log.info("Order ID: {} is picked for delivery", orderId);
 
     }
