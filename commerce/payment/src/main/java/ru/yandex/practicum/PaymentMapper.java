@@ -16,8 +16,8 @@ public interface PaymentMapper {
     PaymentDto map(Payment payment);
 
     @Mapping(target = "state", ignore = true)
-    @Mapping(source = "totalPrice", target = "totalPayment")
+    @Mapping(target = "totalPayment", ignore = true)
     @Mapping(source = "deliveryPrice", target = "deliveryTotal")
-    @Mapping(source = "productPrice", target = "productTotal")
+    @Mapping(target = "productTotal", ignore = true)
     Payment map(OrderDto orderDto);
 }

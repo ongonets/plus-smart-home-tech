@@ -30,11 +30,14 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentDto createPayment(OrderDto order) {
-        if (order.getOrderId() == null || order.getProductPrice() <= 0.0
-                || order.getDeliveryPrice() <= 0.0 || order.getTotalPrice() <= 0.0) {
+        if (order.getOrderId() == null || order.getProducts().isEmpty()|| order.getDeliveryPrice() <= 0.0) {
             throw new NotEnoughInfoInOrderToCalculateException("Not enough information in order");
         }
         Payment payment = mapper.map(order);
+        Double productCost = calculateProductCost(order.getProducts());
+        payment.setProductTotal(productCost);
+        Double totalCost = calculateTotalCost(productCost, order.getDeliveryPrice());
+        payment.setTotalPayment(totalCost);
         payment.setState(PaymentState.PENDING);
         repository.save(payment);
         log.info("Create payment for order ID: {}", payment.getOrderId());
@@ -43,10 +46,11 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public Double calculateTotalCost(OrderDto order) {
-        if (order.getOrderId() == null || order.getProductPrice() <= 0.0 || order.getDeliveryPrice() <= 0.0) {
+        if (order.getOrderId() == null || order.getProducts().isEmpty()|| order.getDeliveryPrice() <= 0.0) {
             throw new NotEnoughInfoInOrderToCalculateException("Not enough information in order");
         }
-        Double totalCost = calculateTotalCost(order.getProductPrice(), order.getDeliveryPrice());
+        Double productCost = calculateProductCost(order.getProducts());
+        Double totalCost = calculateTotalCost(productCost, order.getDeliveryPrice());
         log.info("Calculated total cost for order ID {}, total cost = {}", order.getOrderId(), totalCost);
         return totalCost;
     }
@@ -66,11 +70,7 @@ public class PaymentServiceImpl implements PaymentService {
         if (order.getOrderId() == null || order.getProducts().isEmpty()) {
             throw new NotEnoughInfoInOrderToCalculateException("Not enough information in order");
         }
-        Map<UUID, Integer> products = order.getProducts();
-        Double productCost = products.keySet().stream()
-                .map(storeClient::findProduct)
-                .map(product -> product.getPrice() * products.get(product.getProductId()))
-                .reduce(0.0, Double::sum);
+        Double productCost = calculateProductCost(order.getProducts());
         log.info("Calculated product cost for order ID {}, product cost = {}", order.getOrderId(), productCost);
         return productCost;
     }
@@ -92,6 +92,13 @@ public class PaymentServiceImpl implements PaymentService {
                             return new NoPaymentFoundException(String.format("Not found payment for ID:  %s", orderId));
                         }
                 );
+    }
+
+    private Double calculateProductCost(Map<UUID, Integer> products) {
+        return  products.keySet().stream()
+                .map(storeClient::findProduct)
+                .map(product -> product.getPrice() * products.get(product.getProductId()))
+                .reduce(0.0, Double::sum);
     }
 
     private Double calculateTotalCost(double productPrice, double deliveryPrice) {

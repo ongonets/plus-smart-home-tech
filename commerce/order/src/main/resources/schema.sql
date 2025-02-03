@@ -1,3 +1,13 @@
+-- создаём таблицу addresses
+CREATE TABLE IF NOT EXISTS addresses (
+    id UUID PRIMARY KEY,
+    country VARCHAR,
+    city VARCHAR,
+    street VARCHAR,
+    house VARCHAR,
+    flat VARCHAR
+);
+
 -- создаём таблицу orders
 CREATE TABLE IF NOT EXISTS orders (
     id UUID PRIMARY KEY,
@@ -11,7 +21,8 @@ CREATE TABLE IF NOT EXISTS orders (
     fragile BOOLEAN,
     total_price FLOAT,
     delivery_price FLOAT,
-    product_price FLOAT
+    product_price FLOAT,
+    address_id UUID REFERENCES addresses(id)
 );
 
 -- создаём таблицу products

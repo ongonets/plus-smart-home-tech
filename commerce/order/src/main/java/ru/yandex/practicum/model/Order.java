@@ -35,6 +35,9 @@ public class Order {
     @Column(name="quantity")
     private Map<UUID, Integer> products;
 
+    @Column(name = "shopping_cart_id")
+    private UUID shoppingCartId;
+
     @Column(name = "payment_id")
     private UUID paymentId;
 
@@ -57,6 +60,10 @@ public class Order {
 
     @Column(name = "product_price")
     private double productPrice;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "address_id", referencedColumnName = "id")
+    private DeliveryAddress address;
 
     @Override
     public boolean equals(Object object) {

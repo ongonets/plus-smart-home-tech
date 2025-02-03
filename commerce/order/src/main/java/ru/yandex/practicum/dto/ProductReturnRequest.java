@@ -5,13 +5,14 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.Map;
+import java.util.UUID;
 
 @Data
 public class ProductReturnRequest {
 
     @NotBlank
-    private String orderId;
+    private UUID orderId;
 
     @NotNull
-    private Map<String, Integer> products;
+    private Map<UUID, Integer> products;
 }

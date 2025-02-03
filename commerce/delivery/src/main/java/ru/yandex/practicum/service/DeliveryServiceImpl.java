@@ -39,7 +39,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         Delivery delivery = getDelivery(orderId);
         delivery.setState(DeliveryState.DELIVERED);
         repository.save(delivery);
-        orderClient.completedOrder(orderId);
+        orderClient.deliveryOrder(orderId);
         log.info("Order ID: {} is delivered", orderId);
     }
 
@@ -48,7 +48,6 @@ public class DeliveryServiceImpl implements DeliveryService {
         Delivery delivery = getDelivery(orderId);
         delivery.setState(DeliveryState.IN_PROGRESS);
         repository.save(delivery);
-        orderClient.assemblyOrder(orderId);
         warehouseClient.shippedProductToDelivery(new ShippedToDeliveryRequest(orderId, delivery.getId()));
         log.info("Order ID: {} is picked for delivery", orderId);
 

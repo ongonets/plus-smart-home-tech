@@ -60,7 +60,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public BookedProductsDto checkShoppingCart(ShoppingCartDto shoppingCartDto) {
-        String shoppingCartId = shoppingCartDto.getShoppingCartId();
+        UUID shoppingCartId = shoppingCartDto.getShoppingCartId();
         Map<UUID, Integer> products = shoppingCartDto.getProducts();
         Supplier<Stream<WarehouseProduct>> streamSupplier =
                 () -> productRepository.findAllById(products.keySet()).stream();
