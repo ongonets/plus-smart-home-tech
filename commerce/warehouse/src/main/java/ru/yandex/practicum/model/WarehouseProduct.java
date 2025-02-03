@@ -19,7 +19,6 @@ import java.util.UUID;
 public class WarehouseProduct {
 
     @Id
-    @UuidGenerator
     private UUID id;
 
     private double weight;
