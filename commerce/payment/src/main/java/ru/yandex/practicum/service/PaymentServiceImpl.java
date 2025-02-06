@@ -30,7 +30,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentDto createPayment(OrderDto order) {
-        if (order.getOrderId() == null || order.getProducts().isEmpty()|| order.getDeliveryPrice() <= 0.0) {
+        if (isOrderHasProductsAndDeliveryPrice(order)) {
             throw new NotEnoughInfoInOrderToCalculateException("Not enough information in order");
         }
         Payment payment = mapper.map(order);
@@ -46,7 +46,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public Double calculateTotalCost(OrderDto order) {
-        if (order.getOrderId() == null || order.getProducts().isEmpty()|| order.getDeliveryPrice() <= 0.0) {
+        if (isOrderHasProductsAndDeliveryPrice(order)) {
             throw new NotEnoughInfoInOrderToCalculateException("Not enough information in order");
         }
         Double productCost = calculateProductCost(order.getProducts());
@@ -103,5 +103,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     private Double calculateTotalCost(double productPrice, double deliveryPrice) {
         return productPrice * 1.1 + deliveryPrice;
+    }
+
+    private boolean isOrderHasProductsAndDeliveryPrice(OrderDto order) {
+       return order.getOrderId() == null || order.getProducts().isEmpty()|| order.getDeliveryPrice() <= 0.0;
     }
 }
