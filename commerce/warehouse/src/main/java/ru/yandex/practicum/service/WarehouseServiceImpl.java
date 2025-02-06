@@ -62,10 +62,10 @@ public class WarehouseServiceImpl implements WarehouseService {
     public BookedProductsDto checkShoppingCart(ShoppingCartDto shoppingCartDto) {
         UUID shoppingCartId = shoppingCartDto.getShoppingCartId();
         Map<UUID, Integer> products = shoppingCartDto.getProducts();
-        Supplier<Stream<WarehouseProduct>> streamSupplier =
+        Supplier<Stream<WarehouseProduct>> warehouseProductStream =
                 () -> productRepository.findAllById(products.keySet()).stream();
-        checkProductQuantity(streamSupplier.get(), products);
-        BookedProductsDto bookedProductsDto = calculateDeliveryParams(streamSupplier, products);
+        checkProductQuantity(warehouseProductStream.get(), products);
+        BookedProductsDto bookedProductsDto = calculateDeliveryParams(warehouseProductStream, products);
         log.info("Delivery parameters for shopping cart ID: {} are calculated", shoppingCartId);
         return bookedProductsDto;
     }
@@ -105,11 +105,11 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public BookedProductsDto assemblyProduct(AssemblyProductsForOrderRequest request) {
         Map<UUID, Integer> products = request.getProducts();
-        Supplier<Stream<WarehouseProduct>> streamSupplier =
+        Supplier<Stream<WarehouseProduct>> warehouseProductStream =
                 () -> productRepository.findAllById(products.keySet()).stream();
-        checkProductQuantity(streamSupplier.get(), products);
-        BookedProductsDto bookedProductsDto = calculateDeliveryParams(streamSupplier, products);
-        List<WarehouseProduct> warehouseProducts = streamSupplier.get()
+        checkProductQuantity(warehouseProductStream.get(), products);
+        BookedProductsDto bookedProductsDto = calculateDeliveryParams(warehouseProductStream, products);
+        List<WarehouseProduct> warehouseProducts = warehouseProductStream.get()
                 .peek(product -> reduceQuantity(product, products.get(product.getId())))
                 .toList();
         productRepository.saveAll(warehouseProducts);
@@ -180,25 +180,26 @@ public class WarehouseServiceImpl implements WarehouseService {
         }
     }
 
-    private void checkProductQuantity(Stream<WarehouseProduct> stream,
+    private void checkProductQuantity(Stream<WarehouseProduct> warehouseProductStream,
                                       Map<UUID, Integer> products) {
-        if (stream.anyMatch(product -> product.getQuantity() < products.get(product.getId()))) {
+        if (warehouseProductStream
+                .anyMatch(product -> product.getQuantity() < products.get(product.getId()))) {
             log.error("Quantity of products is less than necessary");
             throw new ProductInShoppingCartLowQuantityInWarehouse("Quantity of products is less than necessary");
         }
     }
 
-    private BookedProductsDto calculateDeliveryParams(Supplier<Stream<WarehouseProduct>> streamSupplier,
+    private BookedProductsDto calculateDeliveryParams(Supplier<Stream<WarehouseProduct>> warehouseProductStream,
                                                       Map<UUID, Integer> products) {
-        Double deliveryVolume = streamSupplier.get()
+        Double deliveryVolume = warehouseProductStream.get()
                 .map(product ->
                         product.getWidth() * product.getHeight() * product.getDepth() * products.get(product.getId())
                 )
                 .reduce(0.0, Double::sum);
-        Double deliveryWeight = streamSupplier.get()
+        Double deliveryWeight = warehouseProductStream.get()
                 .map(product -> product.getWeight() * products.get(product.getId()))
                 .reduce(0.0, Double::sum);
-        boolean isFragile = streamSupplier.get().anyMatch(WarehouseProduct::isFragile);
+        boolean isFragile = warehouseProductStream.get().anyMatch(WarehouseProduct::isFragile);
         return new BookedProductsDto(deliveryVolume, deliveryWeight, isFragile);
     }
 }
