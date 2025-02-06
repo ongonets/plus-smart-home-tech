@@ -31,7 +31,7 @@ public class StoreServiceImpl implements StoreService {
     }
 
     @Override
-    public ProductDto findProduct(String productId) {
+    public ProductDto findProduct(UUID productId) {
         Product product = getProduct(productId);
         return mapper.map(product);
     }
@@ -54,7 +54,7 @@ public class StoreServiceImpl implements StoreService {
     }
 
     @Override
-    public void removeProduct(String productId) {
+    public void removeProduct(UUID productId) {
         Product product = getProduct(productId);
         product.setProductState(ProductState.DEACTIVATE);
         repository.save(product);
@@ -63,16 +63,15 @@ public class StoreServiceImpl implements StoreService {
 
     @Override
     public void updateQuantity(SetProductQuantityStateRequest request) {
-        String productId = request.getProductId();
+        UUID productId = request.getProductId();
         Product product = getProduct(productId);
         product.setQuantity(request.getQuantityState());
         repository.save(product);
         log.info("Update quantity of product ID: {}", productId);
     }
 
-    private Product getProduct(String productId) {
-        UUID uuid = UUID.fromString(productId);
-        return repository.findById(uuid)
+    private Product getProduct(UUID productId) {
+        return repository.findById(productId)
                 .orElseThrow(() ->
                         {
                             log.error("Not found product ID: {} ", productId);

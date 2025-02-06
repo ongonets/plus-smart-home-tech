@@ -54,4 +54,4 @@ services:
     environment:
       - POSTGRES_PASSWORD=smart
       - POSTGRES_USER=smart
-      - POSTGRES_MULTIPLE_DATABASES="shopping-store", "shopping-cart", warehouse
+      - POSTGRES_MULTIPLE_DATABASES="shopping-store", "shopping-cart", warehouse, delivery, payment, "shopping-order"
